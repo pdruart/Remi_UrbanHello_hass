@@ -113,3 +113,16 @@ def build_alarm_unique_id(
     """Return the unique_id of an alarm entity."""
     key = build_alarm_key(alarm_object_id, alarm_name, alarms)
     return f"{device_id}_alarm_{key}_{suffix}"
+
+
+def build_alarm_suggested_object_id(
+    device_name: str,
+    alarm_name: str | None,
+) -> str:
+    """Return the suggested entity_id of an alarm entity.
+
+    Device and alarm names can contain accents, spaces or punctuation that are
+    not valid in an entity_id. Both parts go through the same ``slugify``
+    normalization as the unique_id built by :func:`build_alarm_key`.
+    """
+    return f"{slugify(device_name)}_{slugify(alarm_name or 'alarm')}"

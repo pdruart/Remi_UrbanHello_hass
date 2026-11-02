@@ -11,7 +11,12 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN, build_alarm_unique_id, get_device_info
+from .const import (
+    DOMAIN,
+    build_alarm_suggested_object_id,
+    build_alarm_unique_id,
+    get_device_info,
+)
 from .coordinator import RemiCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -91,16 +96,15 @@ class RemiAlarmSwitch(CoordinatorEntity, SwitchEntity):
         # remi-card looks for time.{device_name}_* and expects matching switch.{device_name}_*
         alarms = coordinator.data.get("alarms", {}) if coordinator.data else {}
         alarm_data = alarms.get(alarm_object_id, {})
-        alarm_name = alarm_data.get("name", "Alarm")
-
-        # Use alarm name for entity_id, objectId for unique_id
-        alarm_name_slug = alarm_name.lower().replace(" ", "_")
+        alarm_name = alarm_data.get("name") or "Alarm"
 
         self._attr_name = f"{device_name} {alarm_name}"
         self._attr_unique_id = build_alarm_unique_id(
             device_id, alarm_object_id, alarm_name, alarms, "enabled"
         )
-        self._attr_suggested_object_id = f"{device_name.lower()}_{alarm_name_slug}"
+        self._attr_suggested_object_id = build_alarm_suggested_object_id(
+            device_name, alarm_name
+        )
 
     @property
     def alarm_data(self) -> dict:
